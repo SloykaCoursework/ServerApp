@@ -1,10 +1,11 @@
-﻿namespace ServerApp.Models;
-
-public enum Grade
+﻿namespace ServerApp.Models
 {
-    A, 
-    B, 
-    C,
-    D,
-    F
+    public enum Grade
+    {
+        A, 
+        B, 
+        C,
+        D,
+        F
+    }
 }

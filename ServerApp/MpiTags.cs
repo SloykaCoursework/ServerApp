@@ -1,8 +1,9 @@
-﻿namespace ServerApp;
-
-public enum MpiTags
+﻿namespace ServerApp
 {
+    public enum MpiTags
+    {
 
-    HandleTask,
+        HandleTask,
 
+    }
 }
