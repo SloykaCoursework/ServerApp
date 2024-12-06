@@ -15,29 +15,30 @@ namespace ServerApp.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Student>()
-                .Property(s => s.StudentId)
-                .ValueGeneratedOnAdd();
-
-            modelBuilder.Entity<Instructor>()
-                .Property(i => i.InstructorId)
-                .ValueGeneratedOnAdd();
-
             modelBuilder.Entity<Course>()
-                .Property(c => c.CourseId)
-                .ValueGeneratedOnAdd();
+                .HasOne(c => c.Instructor)
+                .WithMany(i => i.Courses)
+                .HasForeignKey(c => c.InstructorId);
 
             modelBuilder.Entity<Enrollment>()
-                .Property(e => e.EnrollmentId)
-                .ValueGeneratedOnAdd();
+                .HasOne(e => e.Course)
+                .WithMany(c => c.Enrollments)
+                .HasForeignKey(e => e.CourseId);
 
-            modelBuilder.Entity<Department>()
-                .Property(d => d.DepartmentId)
-                .ValueGeneratedOnAdd();
+            modelBuilder.Entity<Enrollment>()
+                .HasOne(e => e.Student)
+                .WithMany(s => s.Enrollments)
+                .HasForeignKey(e => e.StudentId);
 
-            modelBuilder.Entity<Group>()
-                .Property(g => g.GroupId)
-                .ValueGeneratedOnAdd();
+            modelBuilder.Entity<Instructor>()
+                .HasOne(i => i.Department)
+                .WithMany(d => d.Instructors)
+                .HasForeignKey(i => i.DepartmentId);
+
+            modelBuilder.Entity<Student>()
+                .HasOne(s => s.Group)
+                .WithMany(g => g.Students)
+                .HasForeignKey(s => s.GroupId);
         }
 
         public ApplicationContext()
@@ -48,6 +49,7 @@ namespace ServerApp.Models
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer("Server=127.0.0.1;Database=coursework;Trusted_Connection=False;User Id=sa;Password=zdeL-aL8pw;TrustServerCertificate=True");
+            optionsBuilder.EnableSensitiveDataLogging(true);
         }
         
     }

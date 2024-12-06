@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ServerApp.Models
 {
     public class Student
     {
 
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int StudentId { get; set; }  // Primary Key
 
         [Required, MaxLength(100)]
@@ -21,6 +24,7 @@ namespace ServerApp.Models
         public int GroupId { get; set; }  // Foreign Key
         public virtual Group Group { get; set; }
 
+        [InverseProperty("Student")]
         public virtual ICollection<Enrollment> Enrollments { get; set; }
 
     }

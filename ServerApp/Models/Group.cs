@@ -7,6 +7,8 @@ namespace ServerApp.Models
 {
     public class Group
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int GroupId { get; set; }  // Primary Key
 
         [NotMapped]
