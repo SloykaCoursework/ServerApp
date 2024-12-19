@@ -48,7 +48,7 @@ namespace ServerApp.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=127.0.0.1;Database=coursework;Trusted_Connection=False;User Id=sa;Password=zdeL-aL8pw;TrustServerCertificate=True");
+            optionsBuilder.UseSqlServer("Server=192.168.1.25;Database=coursework;Trusted_Connection=False;User Id=sa;Password=root;TrustServerCertificate=True");
             optionsBuilder.EnableSensitiveDataLogging(true);
         }
         

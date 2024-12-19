@@ -33,11 +33,9 @@ MPI.Environment.Run(ref args, comm =>
 
                     if (comm.Rank == 0)
                         Console.WriteLine("\n" +
-                                        "\t-help(--h), \n" +
-                                        "\t-maxCount(--mc) <count>, \n" +
-                                        "\n" +
-                                        "\n" +
-                                        "");
+                                        "\t-help(--h), displays information about program parameters\n" +
+                                        "\t-maxCount(--mc) <count>, sets the number of records to create\n" +
+                                        "\t-n <count>, sets the number of threads\n");
 
                     return;
 
@@ -87,7 +85,7 @@ MPI.Environment.Run(ref args, comm =>
     if (comm.Rank == 0)
         Task.Run(async () =>
         {
-
+            //init and start tcp server
             var listenAddress = new Uri("tcp://0.0.0.0:5555");
             TcpListener _tcpListener;
             TcpBase tcpBase = new TcpServer();
@@ -141,28 +139,37 @@ MPI.Environment.Run(ref args, comm =>
         if (comm.Rank == 0)
         {
 
+            Logger.LogInformation($"Main pod ready for handle tasks");
+
             while (true)
             {
 
                 if (tasks.Count == 0) continue;
-                Logger.LogInformation($"Main pod ready for send");
 
                 var item = tasks![0];
                 tasks.Remove(item);
+                Logger.LogInformation($"Main pod get task {item.code}");
 
                 for (int i = 1; i < comm.Size; i++)
                     comm.Send(JsonConvert.SerializeObject(item), i, (int)MpiTags.HandleTask);
+
+                //handle task
+
 
                 var ms = HandleTask(item, comm.Rank, comm.Size);
 
                 Logger.LogInformation($"{ms} ms");
 
+                //get all results
                 var resArr = comm.Gather(ms, 0);
 
                 var res = $"min: {resArr.Min()} average: {resArr.Average()} max: {resArr.Max()}";
                 Logger.LogDebug(res);
 
+                //send to client
                 RabbitMQHandler.Send(item.uid, res);
+
+                Logger.LogInformation($"Main pod ready for handle tasks");
 
             }
 
@@ -176,6 +183,7 @@ MPI.Environment.Run(ref args, comm =>
                 Logger.LogInformation($"Ready for recive {comm.Rank}");
                 var task = JsonConvert.DeserializeObject<MpiObj>(comm.Receive<string>(0, (int)MpiTags.HandleTask));
 
+                //handle task
                 var ms = HandleTask(task, comm.Rank, comm.Size);
 
                 Logger.LogInformation($"{ms} ms");
@@ -233,6 +241,16 @@ long HandleTask(MpiObj task, int current, int size)
             {
 
                 var count = DatabaseController.GetStudentCount;
+                if(current == 0) Logger.LogInformation($"Table student have {count} data");
+                
+                if(count == 0)
+                {
+
+                    Logger.LogError("the database is empty");
+                    return -1;
+
+                }
+
                 GetWorkCount(count, current, size, out int workStart, out int workCount);
                 DatabaseController.FindArithmeticMeanValues(workStart, workCount);
 
@@ -243,6 +261,15 @@ long HandleTask(MpiObj task, int current, int size)
             {
 
                 var count = DatabaseController.GetGroupCount;
+
+                if (count == 0)
+                {
+
+                    Logger.LogError("the database is empty");
+                    return -1;
+
+                }
+
                 GetWorkCount(count, current, size, out int workStart, out int workCount);
                 DatabaseController.CountAllGroups(workStart, workCount);
 
@@ -253,6 +280,15 @@ long HandleTask(MpiObj task, int current, int size)
             {
 
                 var count = DatabaseController.GetStudentCount;
+
+                if (count == 0)
+                {
+
+                    Logger.LogError("the database is empty");
+                    return -1;
+
+                }
+
                 GetWorkCount(count, current, size, out int workStart, out int workCount);
                 DatabaseController.ChangeCourseToAll(workStart, workCount);
 
@@ -263,6 +299,15 @@ long HandleTask(MpiObj task, int current, int size)
             {
 
                 var count = DatabaseController.GetStudentCount;
+
+                if (count == 0)
+                {
+
+                    Logger.LogError("the database is empty");
+                    return -1;
+
+                }
+
                 GetWorkCount(count, current, size, out int workStart, out int workCount);
                 DatabaseController.FindOldestStudent(workStart, workCount);
 
@@ -273,6 +318,15 @@ long HandleTask(MpiObj task, int current, int size)
             {
 
                 var count = DatabaseController.GetInstructorCount;
+
+                if (count == 0)
+                {
+
+                    Logger.LogError("the database is empty");
+                    return -1;
+
+                }
+
                 GetWorkCount(count, current, size, out int workStart, out int workCount);
                 DatabaseController.FindYoungerInstructor(workStart, workCount);
 
