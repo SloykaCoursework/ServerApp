@@ -232,7 +232,14 @@ long HandleTask(MpiObj task, int current, int size)
             {
 
                 GetWorkCount(CREATE_COUNT, current, size, out int workStart, out int workCount);
-                DatabaseController.CreateData(workCount);
+                if (!DatabaseController.CreateData(workCount))
+                {
+
+                    sw.Stop();
+                    Logger.LogError($"Database save error on pod #{current}");
+                    return -1;
+
+                }
 
             }
             break;
